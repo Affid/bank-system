@@ -15,13 +15,13 @@ import java.util.Optional;
 
 public class AccountDao implements Closeable {
 
-    private final Connection connection;
-    private boolean isClosed;
     private static final DateTimeFormatter format = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
-    private final CardDao cardDao;
     private static final String ALL = "SELECT * FROM ACCOUNT;";
     private static final String BY_ID = "SELECT * FROM ACCOUNT WHERE ID = ?;";
     private static final String BY_OWNER = "SELECT * FROM ACCOUNT WHERE OWNER = ?;";
+    private final Connection connection;
+    private final CardDao cardDao;
+    private boolean isClosed;
 
     public AccountDao(Connection connection, CardDao cardDao) {
         this.connection = connection;
@@ -29,43 +29,43 @@ public class AccountDao implements Closeable {
         this.cardDao = cardDao;
     }
 
-    public List<Account> getByOwner(long owner){
+    public List<Account> getByOwner(long owner) {
         List<Account> cards = new ArrayList<>();
-        try(PreparedStatement stat = connection.prepareStatement(BY_OWNER)){
+        try (PreparedStatement stat = connection.prepareStatement(BY_OWNER)) {
             stat.setLong(1, owner);
             ResultSet result = stat.executeQuery();
-            while (result.next()){
+            while (result.next()) {
                 long id = result.getLong("ID");
                 cards.add(readAccount(result, id));
             }
         } catch (SQLException throwables) {
-            for(Throwable t: throwables){
+            for (Throwable t : throwables) {
                 t.printStackTrace();
             }
         }
         return cards;
     }
 
-    public Optional<Account> getById(long id){
-        try(PreparedStatement stat = connection.prepareStatement(BY_ID)){
+    public Optional<Account> getById(long id) {
+        try (PreparedStatement stat = connection.prepareStatement(BY_ID)) {
             stat.setLong(1, id);
             ResultSet result = stat.executeQuery();
-            if(result.next()){
+            if (result.next()) {
                 return Optional.of(readAccount(result, id));
             }
         } catch (SQLException throwables) {
-            for(Throwable t: throwables){
+            for (Throwable t : throwables) {
                 t.printStackTrace();
             }
         }
         return Optional.empty();
     }
 
-    public List<Account> all(){
+    public List<Account> all() {
         List<Account> accounts = new ArrayList<>();
-        try(Statement stat = connection.createStatement();
-            ResultSet result = stat.executeQuery(ALL)){
-            while (result.next()){
+        try (Statement stat = connection.createStatement();
+             ResultSet result = stat.executeQuery(ALL)) {
+            while (result.next()) {
                 long id = result.getLong("ID");
                 accounts.add(readAccount(result, id));
             }
@@ -84,15 +84,15 @@ public class AccountDao implements Closeable {
         String owner = result.getString("OWNER");
         BigDecimal balance = result.getBigDecimal("BALANCE");
         ArrayList<Card> cards = new ArrayList<>(cardDao.getByAccount(id));
-        return new Account(balancingAccount,currency,division, control,personalAcc,owner,id,balance, cards);
+        return new Account(balancingAccount, currency, division, control, personalAcc, owner, id, balance, cards);
     }
 
-    public boolean isClosed(){
+    public boolean isClosed() {
         return isClosed;
     }
 
     @Override
-    public void close(){
+    public void close() {
         try {
             connection.close();
         } catch (SQLException throwables) {

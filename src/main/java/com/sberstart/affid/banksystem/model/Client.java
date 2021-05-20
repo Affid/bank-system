@@ -24,7 +24,7 @@ public class Client {
         return accounts.add(account);
     }
 
-    public boolean removeAccount(Account account){
+    public boolean removeAccount(Account account) {
         return accounts.remove(account);
     }
 

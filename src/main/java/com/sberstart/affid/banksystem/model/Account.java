@@ -18,10 +18,8 @@ public class Account {
     private final String owner;
 
     private final long id;
-
-    private BigDecimal balance;
-
     private final ArrayList<Card> cards;
+    private BigDecimal balance;
 
     public Account(String balancingAccount, Currency currency, String division,
                    int control, String personalAcc, String owner, long id,
@@ -37,11 +35,11 @@ public class Account {
         this.cards = cards;
     }
 
-    public void addBalance(BigDecimal val){
+    public void addBalance(BigDecimal val) {
         balance = balance.add(val);
     }
 
-    public void minusBalance(BigDecimal val){
+    public void minusBalance(BigDecimal val) {
         balance = balance.subtract(val);
     }
 
@@ -65,11 +63,11 @@ public class Account {
         return id;
     }
 
-    public String getAccount(){
+    public String getAccount() {
         return balancingAccount + currency.getCode() + control + division + personalAcc;
     }
 
-    public List<Card> getCards(){
+    public List<Card> getCards() {
         return new ArrayList<>(cards);
     }
 }

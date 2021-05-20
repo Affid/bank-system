@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatterBuilder;
 
 public class PassportSerializer extends StdSerializer<Passport> {
 
-    public PassportSerializer(){
+    public PassportSerializer() {
         this(Passport.class);
     }
 
@@ -24,7 +24,7 @@ public class PassportSerializer extends StdSerializer<Passport> {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("id", passport.getId());
-        jsonGenerator.writeStringField("lastName",passport.getLastName());
+        jsonGenerator.writeStringField("lastName", passport.getLastName());
         jsonGenerator.writeStringField("firstName", passport.getFirstName());
         jsonGenerator.writeStringField("secondName", passport.getSecondName());
         jsonGenerator.writeStringField("issueDate", passport.getIssueDate().format(formatter));

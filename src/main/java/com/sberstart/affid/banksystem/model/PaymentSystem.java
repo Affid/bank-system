@@ -9,16 +9,16 @@ public enum PaymentSystem {
         this.code = code;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public static PaymentSystem of(int code){
-        for(PaymentSystem system: values()){
-            if(system.code == code){
+    public static PaymentSystem of(int code) {
+        for (PaymentSystem system : values()) {
+            if (system.code == code) {
                 return system;
             }
         }
         throw new IllegalArgumentException("Constant not found");
+    }
+
+    public int getCode() {
+        return code;
     }
 }

@@ -15,24 +15,22 @@ import java.util.Optional;
 
 public class CardDao {
 
+    private static final DateTimeFormatter format = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
+    private static final String ALL = "SELECT * FROM CARD;";
+    private static final String BY_ID = "SELECT * FROM CARD WHERE ID = ?;";
+    private static final String BY_ACC = "SELECT * FROM CARD WHERE ACCOUNT_ID = ?;";
     private final Connection connection;
     private boolean isClosed;
-    private static final DateTimeFormatter format = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
-
     public CardDao(Connection connection) {
         this.connection = connection;
         this.isClosed = false;
     }
 
-    private static final String ALL = "SELECT * FROM CARD;";
-    private static final String BY_ID = "SELECT * FROM CARD WHERE ID = ?;";
-    private static final String BY_ACC = "SELECT * FROM CARD WHERE ACCOUNT_ID = ?;";
-
-    public List<Card> getAll(){
+    public List<Card> getAll() {
         List<Card> cards = new ArrayList<>();
-        try(Statement stat = connection.createStatement();
-            ResultSet result = stat.executeQuery(ALL)){
-            while (result.next()){
+        try (Statement stat = connection.createStatement();
+             ResultSet result = stat.executeQuery(ALL)) {
+            while (result.next()) {
                 String id = result.getString("ID");
                 cards.add(readCard(result, id));
             }
@@ -42,41 +40,41 @@ public class CardDao {
         return cards;
     }
 
-    public List<Card> getByAccount(long accId){
+    public List<Card> getByAccount(long accId) {
         List<Card> cards = new ArrayList<>();
-        try(PreparedStatement stat = connection.prepareStatement(BY_ACC)){
+        try (PreparedStatement stat = connection.prepareStatement(BY_ACC)) {
             stat.setLong(1, accId);
             ResultSet result = stat.executeQuery();
-            while (result.next()){
+            while (result.next()) {
                 String id = result.getString("ID");
                 cards.add(readCard(result, id));
             }
         } catch (SQLException throwables) {
-            for(Throwable t: throwables){
+            for (Throwable t : throwables) {
                 t.printStackTrace();
             }
         }
         return cards;
     }
 
-    public Optional<Card> getById(String id){
-        try(PreparedStatement stat = connection.prepareStatement(BY_ID)){
+    public Optional<Card> getById(String id) {
+        try (PreparedStatement stat = connection.prepareStatement(BY_ID)) {
             stat.setString(1, id);
             ResultSet result = stat.executeQuery();
-            if(result.next()){
+            if (result.next()) {
                 return Optional.of(readCard(result, id));
             }
         } catch (SQLException throwables) {
-            for(Throwable t: throwables){
+            for (Throwable t : throwables) {
                 t.printStackTrace();
             }
         }
         return Optional.empty();
     }
 
-    public boolean close(){
-        if(isClosed) {
-            return true;
+    public void close() {
+        if (isClosed) {
+            return;
         }
         try {
             connection.close();
@@ -86,7 +84,6 @@ public class CardDao {
                 t.printStackTrace();
             }
         }
-        return isClosed;
     }
 
     private Card readCard(ResultSet result, String id) throws SQLException {

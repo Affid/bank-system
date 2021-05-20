@@ -1,5 +1,7 @@
 package com.sberstart.affid.banksystem.dao;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -7,8 +9,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-
-import org.apache.commons.dbcp2.BasicDataSource;
 
 public class DataSource {
 
@@ -18,17 +18,16 @@ public class DataSource {
         return DATA_SOURCE.getConnection();
     }
 
-    public static BasicDataSource getDataSource(){
+    public static BasicDataSource getDataSource() {
         return DATA_SOURCE;
     }
 
 
-    private static BasicDataSource createPool(){
+    private static BasicDataSource createPool() {
         Properties props = new Properties();
         try (InputStream in = Files.newInputStream(Paths.get("src/main/resources/database.properties"))) {
             props.load(in);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             throw new IllegalStateException("Pool not initialized");
         }
         String drivers = props.getProperty("jdbc.drivers");

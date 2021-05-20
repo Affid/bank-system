@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class AccountSerializer extends StdSerializer<Account> {
 
-    public AccountSerializer(){
+    public AccountSerializer() {
         this(Account.class);
     }
 
@@ -22,11 +22,11 @@ public class AccountSerializer extends StdSerializer<Account> {
     public void serialize(Account account, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("num", account.getAccount());
-        jsonGenerator.writeStringField("currency",account.getCurrency().toString());
+        jsonGenerator.writeStringField("currency", account.getCurrency().toString());
         jsonGenerator.writeStringField("owner", account.getOwner());
         jsonGenerator.writeNumberField("balance", account.getBalance());
         jsonGenerator.writeArrayFieldStart("cards");
-        for(Card card: account.getCards()){
+        for (Card card : account.getCards()) {
             jsonGenerator.writeString(card.getCardNum());
         }
         jsonGenerator.writeEndArray();

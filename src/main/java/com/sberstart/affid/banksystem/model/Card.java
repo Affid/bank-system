@@ -11,8 +11,8 @@ public class Card {
     private final String cvv;
     private final String account;
     private final LocalDate validity;
-    private BigDecimal balance;
     private final CardState state;
+    private BigDecimal balance;
 
     public Card(String id, PaymentSystem paymentSystem, String bankId, int control, String cvv, String account, LocalDate validity, CardState state) {
         this.id = id;
@@ -30,18 +30,18 @@ public class Card {
         return state;
     }
 
-    public Card activate(){
-        if(state.equals(CardState.ACTIVE)){
+    public Card activate() {
+        if (state.equals(CardState.ACTIVE)) {
             return this;
         }
-        if(state != CardState.CLOSED){
+        if (state != CardState.CLOSED) {
             return new Card(id, paymentSystem, bankId, control, cvv, account, validity, CardState.ACTIVE);
         }
         throw new IllegalStateException("Card is already closed.");
     }
 
-    public Card close(){
-        if(state != CardState.PROCESS){
+    public Card close() {
+        if (state != CardState.PROCESS) {
             return new Card(id, paymentSystem, bankId, control, cvv, account, validity, CardState.CLOSED);
         }
         throw new IllegalStateException("Card has not been created yet.");
@@ -83,7 +83,7 @@ public class Card {
         return validity;
     }
 
-    public String getCardNum(){
+    public String getCardNum() {
         return paymentSystem.getCode() + bankId + id + control;
     }
 }

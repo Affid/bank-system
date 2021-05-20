@@ -13,20 +13,20 @@ public enum Currency {
         this.name = name;
     }
 
+    public static Currency of(int code) {
+        for (Currency system : values()) {
+            if (system.code == code) {
+                return system;
+            }
+        }
+        throw new IllegalArgumentException("Constant not found");
+    }
+
     public int getCode() {
         return code;
     }
 
     public String getName() {
         return name;
-    }
-
-    public static Currency of(int code){
-        for(Currency system: values()){
-            if(system.code == code){
-                return system;
-            }
-        }
-        throw new IllegalArgumentException("Constant not found");
     }
 }

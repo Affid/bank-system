@@ -10,19 +10,20 @@ import com.sberstart.affid.banksystem.dao.CardDao;
 import com.sberstart.affid.banksystem.dao.ClientDao;
 import com.sberstart.affid.banksystem.dao.PassportDao;
 import com.sberstart.affid.banksystem.json.AccountSerializer;
+import com.sberstart.affid.banksystem.json.CardSerializer;
 import com.sberstart.affid.banksystem.json.ClientSerializer;
+import com.sberstart.affid.banksystem.json.PassportSerializer;
 import com.sberstart.affid.banksystem.model.Account;
 import com.sberstart.affid.banksystem.model.Card;
 import com.sberstart.affid.banksystem.model.Client;
 import com.sberstart.affid.banksystem.model.Passport;
-import com.sberstart.affid.banksystem.json.CardSerializer;
-import com.sberstart.affid.banksystem.json.PassportSerializer;
 
+import java.io.Closeable;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
-public class BankService {
+public class BankService implements Closeable {
 
     private final ObjectMapper mapper;
     private final CardDao cardDao;
@@ -44,10 +45,10 @@ public class BankService {
         mapper.registerModule(module);
     }
 
-    public Optional<String> getPassportInfo(String id){
+    public Optional<String> getPassportInfo(String id) {
         try {
             Optional<Passport> optionalPassport = passportDao.get(id);
-            if(optionalPassport.isPresent()){
+            if (optionalPassport.isPresent()) {
                 Passport passport = optionalPassport.get();
                 String response = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(passport);
                 return Optional.of(response);
@@ -58,10 +59,10 @@ public class BankService {
         return Optional.empty();
     }
 
-    public Optional<String> getCardInfo(String id){
+    public Optional<String> getCardInfo(String id) {
         try {
             Optional<Card> optionalCard = cardDao.getById(id);
-            if(optionalCard.isPresent()){
+            if (optionalCard.isPresent()) {
                 Card card = optionalCard.get();
                 String response = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(card);
                 return Optional.of(response);
@@ -72,12 +73,12 @@ public class BankService {
         return Optional.empty();
     }
 
-    public Optional<String> getCardsByAccount(long id){
+    public Optional<String> getCardsByAccount(long id) {
         try {
             List<Card> cards = cardDao.getByAccount(id);
             StringBuilder builder = new StringBuilder();
             ArrayNode node = mapper.createArrayNode();
-            for(Card card: cards){
+            for (Card card : cards) {
                 RawValue value = new RawValue(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(card));
                 node.addRawValue(value);
             }
@@ -88,10 +89,10 @@ public class BankService {
         return Optional.empty();
     }
 
-    public Optional<String> getAccount(long id){
+    public Optional<String> getAccount(long id) {
         try {
             Optional<Account> optionalAccount = accountDao.getById(id);
-            if(optionalAccount.isPresent()){
+            if (optionalAccount.isPresent()) {
                 Account account = optionalAccount.get();
                 String response = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(account);
                 return Optional.of(response);
@@ -102,10 +103,10 @@ public class BankService {
         return Optional.empty();
     }
 
-    public Optional<String> getClient(long id){
+    public Optional<String> getClient(long id) {
         try {
             Optional<Client> optionalClient = clientDao.getById(id);
-            if(optionalClient.isPresent()){
+            if (optionalClient.isPresent()) {
                 Client client = optionalClient.get();
                 String response = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(client);
                 return Optional.of(response);
@@ -116,5 +117,12 @@ public class BankService {
         return Optional.empty();
     }
 
+    @Override
+    public void close() {
+        cardDao.close();
+        passportDao.close();
+        accountDao.close();
+
+    }
 
 }
