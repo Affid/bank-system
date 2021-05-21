@@ -1,23 +1,13 @@
 package com.sberstart.affid.banksystem.controller;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-public abstract class AbstractController implements HttpHandler {
+public abstract class Controller {
 
-    protected static final String CONTENT_LENGTH = "Content-Length";
-    protected static final String CONTENT_TYPE = "Content-Type";
-    protected static final String JSON_TYPE = "application/json";
-
-    protected static final String EMPTY = "Empty body";
-    protected static final String BAD_FORMATTING = "Non-well-formed content";
-    protected static final String BAD_CONTENT = "Invalid content fields";
-
-    @Override
     public void handle(HttpExchange exchange) throws IOException {
         switch (exchange.getRequestMethod()) {
             case "GET":
@@ -55,7 +45,13 @@ public abstract class AbstractController implements HttpHandler {
         exchange.close();
     }
 
+    protected void sendResponse(int rCode, HttpExchange exchange) throws IOException {
+        exchange.sendResponseHeaders(rCode, -1);
+        exchange.close();
+    }
+
     public abstract void get(HttpExchange exchange) throws IOException;
 
     public abstract void post(HttpExchange exchange) throws IOException;
+
 }

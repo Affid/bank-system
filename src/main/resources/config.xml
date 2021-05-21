@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <handlers>
+        <handler>
+            <id>1</id>
+            <class>com.sberstart.affid.banksystem.controller.handler.ClientHandler</class>
+            <path>/mama</path>
+            <map class="java.util.HashMap">
+                <entity path="/">1</entity>
+                <entity path="/passport">2</entity>
+            </map>
+        </handler>
+        <handler>
+            <id>2</id>
+            <class>com.sberstart.affid.banksystem.controller.handler.CardHandler</class>
+            <path>/papa</path>
+            <map class="java.util.HashMap">
+                <entity path="/">2</entity>
+                <entity path="/top">1</entity>
+            </map>
+        </handler>
+    </handlers>
+
+    <controllers>
+        <controller>
+            <id>1</id>
+            <class>com.sberstart.affid.banksystem.controller.ClientRootController</class>
+        </controller>
+        <controller>
+            <id>2</id>
+            <class>com.sberstart.affid.banksystem.controller.CardRootController</class>
+        </controller>
+    </controllers>
+</root>
