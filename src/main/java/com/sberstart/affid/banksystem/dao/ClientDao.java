@@ -16,6 +16,7 @@ public class ClientDao implements Closeable {
     private final AccountDao accountDao;
     private final String ALL = "SELECT * FROM CLIENT;";
     private final String BY_ID = "SELECT * FROM CLIENT WHERE ID = ?;";
+    private final String BY_PHONE = "SELECT * FROM CLIENT WHERE PHONE = ?";
     private boolean isClosed;
 
     public ClientDao(Connection connection, PassportDao passportDao, AccountDao accountDao) {
@@ -23,6 +24,22 @@ public class ClientDao implements Closeable {
         this.passportDao = passportDao;
         this.accountDao = accountDao;
         this.isClosed = false;
+    }
+
+    public Optional<Client> getByPhone(String phone) {
+        try (PreparedStatement stat = connection.prepareStatement(BY_PHONE)) {
+            stat.setString(1, phone);
+            ResultSet resultSet = stat.executeQuery();
+            if (resultSet.next()) {
+                Optional<Passport> optionalPassport = passportDao.get(resultSet.getString("PASSPORT"));
+                if (optionalPassport.isPresent()) {
+                    return Optional.of(readClient(resultSet, phone, optionalPassport.get()));
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     public Optional<Client> getById(long id) {
@@ -60,6 +77,12 @@ public class ClientDao implements Closeable {
 
     private Client readClient(ResultSet result, long id, Passport passport) throws SQLException {
         String phone = result.getString("PHONE");
+        ArrayList<Account> accounts = new ArrayList<>(accountDao.getByOwner(id));
+        return new Client(id, passport, phone, accounts);
+    }
+
+    private Client readClient(ResultSet result, String phone, Passport passport) throws SQLException {
+        long id = result.getLong("ID");
         ArrayList<Account> accounts = new ArrayList<>(accountDao.getByOwner(id));
         return new Client(id, passport, phone, accounts);
     }

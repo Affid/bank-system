@@ -22,6 +22,15 @@ public enum Currency {
         throw new IllegalArgumentException("Constant not found");
     }
 
+    public static boolean contains(int code){
+        for (Currency system : values()) {
+            if (system.code == code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int getCode() {
         return code;
     }

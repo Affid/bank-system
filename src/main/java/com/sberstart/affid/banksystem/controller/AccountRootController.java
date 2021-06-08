@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sberstart.affid.banksystem.dao.DataSource;
-import com.sberstart.affid.banksystem.json.schemas.CreateCardBody;
+import com.sberstart.affid.banksystem.json.schemas.CreateAccountBody;
 import com.sberstart.affid.banksystem.service.BankService;
-import com.sberstart.affid.banksystem.validation.CardBodyValidator;
+import com.sberstart.affid.banksystem.validation.AccountBodyValidator;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import static com.sberstart.affid.banksystem.controller.Responses.*;
 
-public class CardRootController extends Controller {
+public class AccountRootController extends Controller{
 
     @Override
     public void get(HttpExchange exchange) throws IOException {
@@ -31,18 +31,18 @@ public class CardRootController extends Controller {
             }
             Optional<String> optionalId = params.getFirst("id");
             if (!optionalId.isPresent()) {
-                sendResponse(404, "", exchange);
+                sendResponse(404, exchange);
                 return;
             }
             String id = optionalId.get();
-            if(!CardBodyValidator.validateCardNum(id)){
-                sendResponse(400, String.format(BAD_NUMBER, "card"), exchange);
+            if(!AccountBodyValidator.validateNumber(id)){
+                sendResponse(400, String.format(BAD_NUMBER, "account"), exchange);
                 return;
             }
             try (BankService service = new BankService(DataSource.getConnection())) {
-                sendResponseIfPresent(exchange, service.getCardInfo(id));
+                sendResponseIfPresent(exchange, service.getAccountInfo(id));
             } catch (SQLException e) {
-                sendResponse(500, "", exchange);
+                sendResponse(500, exchange);
             }
         }catch (MalformedURLException e){
             sendResponse(400, e.getMessage(), exchange);
@@ -63,21 +63,22 @@ public class CardRootController extends Controller {
             return;
         }
         try {
-            CreateCardBody body = mapper.readValue(exchange.getRequestBody(), CreateCardBody.class);
-            CardBodyValidator validator = new CardBodyValidator();
+            CreateAccountBody body = mapper.readValue(exchange.getRequestBody(), CreateAccountBody.class);
+            AccountBodyValidator validator = new AccountBodyValidator();
             try{
                 if(!validator.validate(body)) {
-                    sendResponse(400, String.format(BAD_NUMBER,"account"), exchange);
+                    sendResponse(400, BAD_CONTENT, exchange);
                     return;
                 }
             }catch (IllegalStateException e){
                 sendResponse(400, e.getMessage(),exchange);
             }
             BankService service = new BankService(DataSource.getConnection());
-            Optional<String> response = service.createCard(body);
+            Optional<String> response = service.createAccount(body);
             if(response.isPresent()) {
                 sendResponse(201, response.get(), exchange);
             }
+            sendResponse(500, exchange);
         } catch (JsonParseException e) {
             sendResponse(400, BAD_FORMATTING, exchange);
         } catch (JsonMappingException e) {

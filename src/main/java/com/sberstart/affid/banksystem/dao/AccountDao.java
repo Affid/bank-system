@@ -3,7 +3,9 @@ package com.sberstart.affid.banksystem.dao;
 import com.sberstart.affid.banksystem.model.Account;
 import com.sberstart.affid.banksystem.model.Card;
 import com.sberstart.affid.banksystem.model.Currency;
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 
+import javax.management.InstanceAlreadyExistsException;
 import java.io.Closeable;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -19,6 +21,12 @@ public class AccountDao implements Closeable {
     private static final String ALL = "SELECT * FROM ACCOUNT;";
     private static final String BY_ID = "SELECT * FROM ACCOUNT WHERE ID = ?;";
     private static final String BY_OWNER = "SELECT * FROM ACCOUNT WHERE OWNER = ?;";
+    private static final String BY_NUM = "SELECT * FROM ACCOUNT WHERE " +
+            "ACCOUNT_B = ? AND CURRENCY = ? AND KEY = ? AND DIVISION = ? AND PERSONAL_ACC = ?";
+    private static final String CREATE = "INSERT INTO ACCOUNT(account_b, currency, key, division, personal_acc, owner, balance) " +
+            "VALUES(?, ?, ?, ?, ?, ?, ?);";
+
+    private static final String FILL = "UPDATE ACCOUNT SET BALANCE = BALANCE + ? WHERE ID = ?;";
     private final Connection connection;
     private final CardDao cardDao;
     private boolean isClosed;
@@ -44,6 +52,26 @@ public class AccountDao implements Closeable {
             }
         }
         return cards;
+    }
+
+    public Optional<Account> getByNum(String accountB, String currency, int control, String division, String personalAcc) {
+        try (PreparedStatement stat = connection.prepareStatement(BY_NUM)) {
+            stat.setString(1, accountB);
+            stat.setString(2, currency);
+            stat.setInt(3, control);
+            stat.setString(4, division);
+            stat.setString(5, personalAcc);
+            ResultSet result = stat.executeQuery();
+            if (result.next()) {
+                long id = result.getLong("ID");
+                return Optional.of(readAccount(result, id));
+            }
+        } catch (SQLException throwables) {
+            for (Throwable t : throwables) {
+                t.printStackTrace();
+            }
+        }
+        return Optional.empty();
     }
 
     public Optional<Account> getById(long id) {
@@ -85,6 +113,43 @@ public class AccountDao implements Closeable {
         BigDecimal balance = result.getBigDecimal("BALANCE");
         ArrayList<Card> cards = new ArrayList<>(cardDao.getByAccount(id));
         return new Account(balancingAccount, currency, division, control, personalAcc, owner, id, balance, cards);
+    }
+
+    public Optional<Account> add(String accountB, String currency, int control, String division,
+                                 String personalAcc, long owner)
+            throws InstanceAlreadyExistsException {
+        try (PreparedStatement stat = connection.prepareStatement(CREATE)) {
+            stat.setString(1, accountB);
+            stat.setString(2, currency);
+            stat.setInt(3, control);
+            stat.setString(4, division);
+            stat.setString(5, personalAcc);
+            stat.setLong(6, owner);
+            stat.setBigDecimal(7, BigDecimal.ZERO);
+            stat.executeUpdate();
+            return getByNum(accountB, currency, control, division, personalAcc);
+        } catch (JdbcSQLIntegrityConstraintViolationException e) {
+            throw new InstanceAlreadyExistsException("Account already exists");
+        } catch (SQLException throwables) {
+            for (Throwable t : throwables) {
+                t.printStackTrace();
+            }
+        }
+        return Optional.empty();
+    }
+
+    public boolean refill(long number, BigDecimal amount) {
+        try (PreparedStatement accountFill = connection.prepareStatement(FILL)) {
+            accountFill.setBigDecimal(1, amount);
+            accountFill.setLong(2, number);
+
+            return (accountFill.executeUpdate() == 1);
+        } catch (SQLException throwables) {
+            for (Throwable t : throwables) {
+                t.printStackTrace();
+            }
+        }
+        return false;
     }
 
     public boolean isClosed() {

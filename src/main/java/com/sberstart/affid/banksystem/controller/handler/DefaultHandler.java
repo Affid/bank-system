@@ -1,19 +1,17 @@
 package com.sberstart.affid.banksystem.controller.handler;
 
 import com.sberstart.affid.banksystem.controller.Controller;
-import com.sberstart.affid.banksystem.controller.UrlParams;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
-public abstract class AbstractHandler implements HttpHandler {
+public class DefaultHandler implements HttpHandler {
 
     protected HashMap<String, Controller> controllers;
 
-    public AbstractHandler() {
+    public DefaultHandler() {
         controllers = new HashMap<>();
     }
 

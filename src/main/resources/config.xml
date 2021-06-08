@@ -3,32 +3,64 @@
     <handlers>
         <handler>
             <id>1</id>
-            <class>com.sberstart.affid.banksystem.controller.handler.ClientHandler</class>
-            <path>/mama</path>
+            <class>com.sberstart.affid.banksystem.controller.handler.DefaultHandler</class>
+            <path>/api/v1/client</path>
             <map class="java.util.HashMap">
-                <entity path="/">1</entity>
-                <entity path="/passport">2</entity>
+                <entity path="/">clientRoot</entity>
+                <entity path="/cards">clientCards</entity>
             </map>
         </handler>
         <handler>
             <id>2</id>
-            <class>com.sberstart.affid.banksystem.controller.handler.CardHandler</class>
-            <path>/papa</path>
+            <class>com.sberstart.affid.banksystem.controller.handler.DefaultHandler</class>
+            <path>/api/v1/card</path>
             <map class="java.util.HashMap">
-                <entity path="/">2</entity>
-                <entity path="/top">1</entity>
+                <entity path="/">cardRoot</entity>
+                <entity path="/state">cardState</entity>
+            </map>
+        </handler>
+        <handler>
+            <id>3</id>
+            <class>com.sberstart.affid.banksystem.controller.handler.DefaultHandler</class>
+            <path>/api/v1/account</path>
+            <map class="java.util.HashMap">
+                <entity path="/">accountRoot</entity>
+            </map>
+        </handler>
+        <handler>
+            <id>4</id>
+            <class>com.sberstart.affid.banksystem.controller.handler.DefaultHandler</class>
+            <path>/api/v1/refill</path>
+            <map class="java.util.HashMap">
+                <entity path="/">refill</entity>
             </map>
         </handler>
     </handlers>
 
     <controllers>
         <controller>
-            <id>1</id>
+            <id>clientRoot</id>
             <class>com.sberstart.affid.banksystem.controller.ClientRootController</class>
         </controller>
         <controller>
-            <id>2</id>
+            <id>cardRoot</id>
             <class>com.sberstart.affid.banksystem.controller.CardRootController</class>
+        </controller>
+        <controller>
+            <id>cardState</id>
+            <class>com.sberstart.affid.banksystem.controller.CardStateController</class>
+        </controller>
+        <controller>
+            <id>accountRoot</id>
+            <class>com.sberstart.affid.banksystem.controller.AccountRootController</class>
+        </controller>
+        <controller>
+            <id>clientCards</id>
+            <class>com.sberstart.affid.banksystem.controller.ClientCardsController</class>
+        </controller>
+        <controller>
+            <id>refill</id>
+            <class>com.sberstart.affid.banksystem.controller.RefillController</class>
         </controller>
     </controllers>
 </root>

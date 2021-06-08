@@ -1,0 +1,9 @@
+src/main/resources/initializeDB/tables.sql
+src/main/resources/initializeDB/currency.sql
+src/main/resources/initializeDB/states.sql
+src/main/resources/initializeDB/pasports.sql
+src/main/resources/initializeDB/clients.sql
+src/main/resources/initializeDB/account.sql
+src/main/resources/initializeDB/cards.sql
+src/main/resources/initializeDB/def_accounts.sql
+src/main/resources/initializeDB/contragent.sql

@@ -1,7 +1,7 @@
 package com.sberstart.affid.banksystem.config;
 
 import com.sberstart.affid.banksystem.controller.Controller;
-import com.sberstart.affid.banksystem.controller.handler.AbstractHandler;
+import com.sberstart.affid.banksystem.controller.handler.DefaultHandler;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ApplicationContext {
-    private final Map<String, Constructor<? extends AbstractHandler>> handlerConstructorMap = new HashMap<>();
+    private final Map<String, Constructor<? extends DefaultHandler>> handlerConstructorMap = new HashMap<>();
     private final Map<String, Constructor<? extends Controller>> controllerConstructorMap = new HashMap<>();
 
     private final Path config;
@@ -50,14 +52,14 @@ public class ApplicationContext {
         return controllerBeans;
     }
 
-    public Map<String, AbstractHandler> getHandlers() throws ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public Map<String, DefaultHandler> getHandlers() throws ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Map<String, ControllerBean> controllerBeans = new HashMap<>();
         for (ControllerBean bean : this.controllerBeans) {
             controllerBeans.put(bean.getId(), bean);
         }
-        Map<String, AbstractHandler> handlers = new HashMap<>();
+        Map<String, DefaultHandler> handlers = new HashMap<>();
         for (HandlerBean bean : this.handlerBeans) {
-            AbstractHandler handler = createHandler(bean);
+            DefaultHandler handler = createHandler(bean);
             for (Map.Entry<String, String> control : bean.getControllers().entrySet()) {
                 Controller controller = createController(controllerBeans.get(control.getValue()).getControllerClass());
                 handler.registerController(control.getKey(), controller);
@@ -67,23 +69,24 @@ public class ApplicationContext {
         return handlers;
     }
 
-    private AbstractHandler createHandler(HandlerBean bean) throws ClassNotFoundException,
+    private DefaultHandler createHandler(HandlerBean bean) throws ClassNotFoundException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
         String handler = bean.getHandlerClass();
         if (handlerConstructorMap.containsKey(handler)) {
+            Logger.getLogger("BankServer").log(Level.INFO,"USE CASHED CONSTRUCTOR: " + handler);
             return handlerConstructorMap.get(handler).newInstance();
         } else {
             Class<?> klass = Class.forName(handler);
-            if (AbstractHandler.class.isAssignableFrom(klass)) {
-                Class<? extends AbstractHandler> clazz = klass.asSubclass(AbstractHandler.class);
-                Constructor<? extends AbstractHandler> constructor =
-                        (Constructor<? extends AbstractHandler>) clazz.getDeclaredConstructors()[0];
-                AbstractHandler o = constructor.newInstance();
+            if (DefaultHandler.class.isAssignableFrom(klass)) {
+                Class<? extends DefaultHandler> clazz = klass.asSubclass(DefaultHandler.class);
+                Constructor<? extends DefaultHandler> constructor =
+                        (Constructor<? extends DefaultHandler>) clazz.getDeclaredConstructors()[0];
+                DefaultHandler o = constructor.newInstance();
                 handlerConstructorMap.put(handler, constructor);
                 return o;
             } else {
                 throw new ClassCastException("INCOMPATIBLE TYPES: " +
-                        AbstractHandler.class.getName() + " and  " + handler);
+                        DefaultHandler.class.getName() + " and  " + handler);
             }
         }
     }
@@ -91,7 +94,7 @@ public class ApplicationContext {
     private Controller createController(String name) throws InvocationTargetException,
             InstantiationException, IllegalAccessException, ClassNotFoundException {
         if (controllerConstructorMap.containsKey(name)) {
-            System.out.println("USE CASHED CONSTRUCTOR: " + name);
+            Logger.getLogger("BankServer").log(Level.INFO,"USE CASHED CONSTRUCTOR: " + name);
             return controllerConstructorMap.get(name).newInstance();
         } else {
             Class<?> klass = Class.forName(name);

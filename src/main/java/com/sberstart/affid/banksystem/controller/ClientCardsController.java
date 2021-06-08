@@ -11,47 +11,57 @@ import java.util.Optional;
 
 import static com.sberstart.affid.banksystem.controller.Responses.BAD_QUERY;
 
-public class ClientRootController extends Controller {
+public class ClientCardsController extends Controller {
 
 
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        if ("GET".equals(exchange.getRequestMethod())) {
+            get(exchange);
+        } else {
+            notAllowed(exchange);
+        }
+    }
+
+    @Override
     public void get(HttpExchange exchange) throws IOException {
-        try{
+        try {
             UrlParams params = UrlParams.getParams(exchange.getRequestURI());
             if (!params.contains("id") && !params.contains("phone")) {
                 sendResponse(400, BAD_QUERY, exchange);
                 return;
             }
-            if(params.contains("id")) {
+            if (params.contains("id")) {
                 Optional<String> optionalId = params.getFirst("id");
                 if (!optionalId.isPresent()) {
-                    sendResponse(404, "", exchange);
+                    sendResponse(400, BAD_QUERY, exchange);
                     return;
                 }
                 long id = Long.parseLong(optionalId.get());
                 try (BankService service = new BankService(DataSource.getConnection())) {
-                    sendResponseIfPresent(exchange, service.getClient(id));
+                    sendResponseIfPresent(exchange, service.getClientCards(id));
                 } catch (SQLException e) {
-                    sendResponse(500, "", exchange);
+                    sendResponse(500, exchange);
                 }
-            }
-            else {
+            } else {
                 Optional<String> optionalPhone = params.getFirst("phone");
                 if (!optionalPhone.isPresent()) {
                     sendResponse(404, exchange);
                     return;
                 }
                 try (BankService service = new BankService(DataSource.getConnection())) {
-                    sendResponseIfPresent(exchange, service.getClient(optionalPhone.get()));
+                    sendResponseIfPresent(exchange, service.getClientCards(optionalPhone.get()));
                 } catch (SQLException e) {
-                    sendResponse(500, "", exchange);
+                    sendResponse(500, exchange);
                 }
             }
-        }catch (MalformedURLException e){
+        } catch (MalformedURLException e) {
             sendResponse(400, e.getMessage(), exchange);
         }
     }
 
+    @Override
     public void post(HttpExchange exchange) throws IOException {
-        sendResponse(204, exchange);
+
     }
 }
